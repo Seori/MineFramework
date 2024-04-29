@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
-using System.Windows.Forms;
+using System.Diagnostics;
 
 namespace MineFramework
 {
@@ -45,28 +45,27 @@ namespace MineFramework
             // 실제 로그 저장위치
             string writepath = logpath + @"\" + _filename;
 
-            // 실제경로와 파일이 생성되었는지 체크합니다.
-            FileCls.makeFd(logpath);
-            //FileCls.makeFile(logpath, _filename);
-
-            // 로그를 저장합니다.
-            using (StreamWriter sw = new StreamWriter(writepath, true))
+            try
             {
-                string _fullmsg = DateTime.Now + " | " + _msg;
-                sw.WriteLine(_fullmsg);
-                
-                //쓰기를 완료했으면 닫아준다.
-                sw.Close();
-                sw.Dispose();
+                // 실제경로와 파일이 생성되었는지 체크합니다.
+                FileCls.makeFd(logpath);
+                //FileCls.makeFile(logpath, _filename);
+
+                // 로그를 저장합니다.
+                using (StreamWriter sw = new StreamWriter(writepath, true))
+                {
+                    string _fullmsg = DateTime.Now + " | " + _msg;
+                    sw.WriteLine(_fullmsg);
+
+                    //쓰기를 완료했으면 닫아준다.
+                    sw.Close();
+                    sw.Dispose();
+                }
+            }
+            catch(Exception ex)
+            {
+                Trace.WriteLine("LogCls.writeLog Error : " + ex.Message);
             }
         }
-
-        #region Contol을 넘겨받아 텍스트를 출력합니다. (writeFrmLog)
-        public static void writeFrmLog(TextBox _tb, string _text)
-        {
-            TextBox tb = _tb;
-            tb.AppendText(_text + "\r\n");
-        }
-        #endregion
     }
 }

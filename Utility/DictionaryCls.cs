@@ -124,6 +124,5 @@ namespace MineFramework
                 return outValue;
             }
         }
-
     }
 }
