@@ -364,6 +364,28 @@ namespace MineFramework
         }
 
         /// <summary>
+        /// 파일을 삭제합니다.
+        /// </summary>
+        /// <param name="_targetpath">삭제할 파일경로</param>
+        /// <param name="_filename">삭제할파일명</param>
+        /// <returns></returns>
+        public static int delFile(string _targetfullpath)
+        {
+            try
+            {
+                // 파일삭제
+                File.Delete(_targetfullpath);
+
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                LogCls.writeLog("", "MineFrameworkLog.log", "File Delete Error (" + ex.Message + ")");
+                return -98;
+            }
+        }
+
+        /// <summary>
         /// 인증서 경로를 조회하여 데이터를 가져옵니다.
         /// </summary>
         /// <returns></returns>
@@ -510,17 +532,77 @@ namespace MineFramework
         }
 
         /// <summary>
+        /// 해당폴더에서 해당하는 확장자의 파일리스트(경로포함)를 가져옵니다.
+        /// </summary>
+        /// <param name="_ext">확장자</param>
+        /// <param name="_folderName"></param>
+        /// <param name="fileList"></param>
+        /// <returns></returns>
+        public static ArrayList getFileList(string _dirPath, ArrayList fileList, string _mode)
+        {
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(_dirPath);
+
+                string strFile = string.Empty;
+                string strFileName = string.Empty;
+
+                string[] strFileFull;
+                foreach (FileInfo f in di.GetFiles())
+                {
+                    if (_mode == "ALL")
+                    {
+                        // 전체경로 및 파일명 포함
+                        strFile = di.FullName + "\\" + f.Name;
+                        strFileName = f.Name;
+
+                        strFileFull = new string[] { strFile, strFileName };
+                        fileList.Add(strFileFull);
+                    }
+                    else if (_mode == "PATH")
+                    {
+                        // 전체경로포함
+                        strFile = di.FullName + "\\" + f.Name;
+                        fileList.Add(strFile);
+                    }
+                    else
+                    {
+                        // 파일명만
+                        strFile = f.Name;
+                        fileList.Add(strFile);
+                    }
+                }
+
+                foreach (DirectoryInfo sd in di.GetDirectories())
+                {
+                    getFileList(sd.FullName, fileList, _mode);
+                }
+
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            finally
+            {
+
+            }
+
+            return fileList;
+        }
+
+        /// <summary>
         /// 해당폴더에서 해당하는 확장자의 파일리스트를 가져옵니다.
         /// </summary>
         /// <param name="_ext">확장자</param>
         /// <param name="_folderName"></param>
         /// <param name="fileList"></param>
         /// <returns></returns>
-        public static ArrayList getFileList(string _ext, string _folderName, ArrayList fileList)
+        public static ArrayList getFileList(string _ext, string _dirPath, ArrayList fileList)
         {
             try
             {
-                DirectoryInfo di = new DirectoryInfo(_folderName);
+                DirectoryInfo di = new DirectoryInfo(_dirPath);
 
                 if (!_ext.StartsWith("."))
                 {

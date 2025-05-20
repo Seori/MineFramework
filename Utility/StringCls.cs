@@ -632,9 +632,11 @@ namespace MineFramework
         }
         #endregion
 
-        #region fnJsonStrToDataRow : Json String을 받아서 Array를 Return 합니다.
         public static string[] fnJsonStrToDataRow(string jsonstring)
         {
+            
+
+
             // JArray로 json 해석
             var jArray = JArray.Parse(jsonstring);
 
@@ -650,7 +652,6 @@ namespace MineFramework
 
             return tmpStr;
         }
-        #endregion
 
         #region fnMakeJsonFile : DataTable을 받아 Json파일 넘어온경로에 생성합니다.
         /// <summary>
@@ -687,27 +688,5 @@ namespace MineFramework
             }
         }
         #endregion
-
-        /// <summary>
-        /// GeneralDictionary 를 Json형식으로 반환한다.
-        /// </summary>
-        /// <returns></returns>
-        public static string fnGdToJson(GeneralDictionary gd)
-        {
-            string jsonstring = string.Empty;
-            GeneralDictionary _gd = gd;
-
-            for (int i = 0; i < gd.Count; i++) 
-            {
-                
-            }
-
-            return jsonstring;
-        }
-
-        public static string GetParamString(GeneralDictionary odParams, string szKey)
-        {
-            return odParams[szKey, ""].ToString();
-        }
     }
 }
