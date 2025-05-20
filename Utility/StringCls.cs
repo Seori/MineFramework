@@ -634,9 +634,6 @@ namespace MineFramework
 
         public static string[] fnJsonStrToDataRow(string jsonstring)
         {
-            
-
-
             // JArray로 json 해석
             var jArray = JArray.Parse(jsonstring);
 
