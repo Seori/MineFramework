@@ -86,7 +86,7 @@ namespace MineFramework
         /// </summary>
         public static void makeConString()
         {
-            constring = "Data Source=" + dbipaddr + "," + dbport + ";Database=" + dbname + ";UID=" + dbid + ";PWD=" + dbpw + ";Connection Timeout=3600"; 
+            constring = "Data Source=" + dbipaddr + "," + dbport + ";Database=" + dbname + ";UID=" + dbid + ";PWD=" + dbpw + ";Connection Timeout=3600;Integrated Security=SSPI"; 
         }
         
         public static SqlConnection connObject
