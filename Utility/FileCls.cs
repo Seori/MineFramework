@@ -637,6 +637,34 @@ namespace MineFramework
         }
 
         /// <summary>
+        /// 디렉토리 (하위포함) 명을 가져옵니다.
+        /// </summary>
+        /// <param name="_dirPath"></param>
+        /// <param name="dirList"></param>
+        /// <returns></returns>
+        public static ArrayList getDirectoryNameList(string _dirPath, ArrayList dirList)
+        {
+            try
+            {
+                DirectoryInfo di = new DirectoryInfo(_dirPath);
+                foreach (DirectoryInfo sd in di.GetDirectories())
+                {
+                    dirList.Add(sd.Name);
+                    getDirectoryNameList(sd.FullName, dirList);
+                }
+            }
+            catch (Exception e)
+            {
+                return null;
+            }
+            finally
+            {
+            }
+            return dirList;
+        }
+
+
+        /// <summary>
         /// 파라미터로 넘어온경로에 파일이 있는지 확인하고 DataTable을 Json으로 전환하여
         /// 해당경로에 파일을 생성하거나 기존파일의 내용을 교체합니다.
         /// </summary>

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace MineFramework
@@ -24,7 +25,6 @@ namespace MineFramework
 
         }
 
-        public static int fnFileUpload(string localPath, string serverIp, string ftpPath, string filename, string ftpid, string ftppw)
         {
             if (string.IsNullOrEmpty(localPath))
             {
@@ -41,12 +41,12 @@ namespace MineFramework
                 return -30;
             }
 
+            // 경로 정리
+            ftpPath = ftpPath.Replace("\\", "/");
+
             string strFTPFullPath = string.Format("ftp://{0}{1}/{2}", serverIp, ftpPath, filename);
             FtpWebRequest ftpWeb = (FtpWebRequest)WebRequest.Create(strFTPFullPath);
             ftpWeb.Credentials = new NetworkCredential(ftpid, ftppw);
-            //ftpWeb.KeepAlive = false;
-            //ftpWeb.Method = WebRequestMethods.Ftp.ListDirectory;
-            ftpWeb.UsePassive = false;
             ftpWeb.UseBinary = true;
             ftpWeb.Timeout = 60000;
             ftpWeb.Method = WebRequestMethods.Ftp.UploadFile;
@@ -54,6 +54,9 @@ namespace MineFramework
             Stream stream = null;
             FileInfo uploadfile = new FileInfo(localPath);
             FileStream fs = uploadfile.OpenRead();
+            Stream stream = null;
+            byte[] buf = new byte[2048];
+            int currentOffset = 0;
 
             try
             {
@@ -85,5 +88,188 @@ namespace MineFramework
 
             return 0;
         }
+        #endregion
+
+        /// <summary>
+        /// SFTP로 업로드 처리합니다.
+        /// </summary>
+        /// <param name="localPath">로컬경로</param>
+        /// <param name="serverIp">FTP서버IP</param>
+        /// <param name="ftpBasicPath">FTP기본경로</param>
+        /// <param name="ftpFilePath">FTP경로</param>
+        /// <param name="ftpFilename">FTP파일명</param>
+        /// <param name="ftpid">FTP ID</param>
+        /// <param name="ftppw">FTP PW</param>
+        /// <returns></returns>
+        public int fnSFTPUpload(string localPath, string serverIp, string ftpBasicPath, string ftpFilePath, string ftpFilename, string ftpid, string ftppw)
+        {
+            if (string.IsNullOrEmpty(localPath))
+            {
+                return -10;
+            }
+
+            if (string.IsNullOrEmpty(ftpFilename))
+            {
+                return -30;
+            }
+
+            // 경로 정리
+            ftpFilePath = ftpFilePath.Replace("\\", "/");
+
+            using (SftpClient client = new SftpClient(serverIp, 22, ftpid, ftppw))
+            {
+                client.KeepAliveInterval = TimeSpan.FromSeconds(60);
+                client.ConnectionInfo.Timeout = TimeSpan.FromMinutes(180);
+                client.OperationTimeout = TimeSpan.FromMinutes(180);
+                client.Connect();
+                bool connected = client.IsConnected;
+
+                string remoteDir = ftpBasicPath + ftpFilePath;
+                addLog("remoteDir" + remoteDir);
+
+                client.ChangeDirectory(remoteDir);
+                addLog("Working Directory : " + client.WorkingDirectory);
+
+                UploadDirectory(client, localPath, remoteDir);
+
+                client.Disconnect();
+            }
+
+            return 0;
+        }
+
+        #region FTP경로가 있는지 체크합니다.
+        /// <summary>
+        /// FTP경로가 있는지 체크합니다.
+        /// </summary>
+        /// <param name="serverIp">FTP서버IP</param>
+        /// <param name="ftpBasicPath">FTP기본경로</param>
+        /// <param name="ftpFilePath">FTP경로</param>
+        /// <param name="ftpid">FTP ID</param>
+        /// <param name="ftppw">FTP PW</param>
+        /// <returns></returns>
+        public bool fnChkFtpDir(string serverIp, string ftpBasicPath, string ftpFilePath, string ftpid, string ftppw)
+        {
+            try
+            {
+                addLog("FTP CHECK PATH : " + string.Format("ftp://{0}{1}{2}/", serverIp, ftpBasicPath, ftpFilePath));
+
+                FtpWebRequest ftpWeb = (FtpWebRequest)WebRequest.Create(string.Format("ftp://{0}{1}{2}/", serverIp, ftpBasicPath, ftpFilePath));
+                ftpWeb.Method = WebRequestMethods.Ftp.ListDirectory;
+                ftpWeb.Credentials = new NetworkCredential(ftpid, ftppw);
+                if (usePassive)
+                {
+                    ftpWeb.UsePassive = true;
+                }
+
+                using (ftpWeb.GetResponse())
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _errMsg = "[fnChkFtpDir] FTP폴더조회오류 " + ex.Message;
+                return false;
+            }
+        }
+        #endregion
+
+        #region FTP경로를 생성합니다.
+        /// <summary>
+        /// FTP경로를 생성합니다.
+        /// </summary>
+        /// <param name="localPath">로컬경로</param>
+        /// <param name="serverIp">FTP서버IP</param>
+        /// <param name="ftpBasicPath">FTP기본경로</param>
+        /// <param name="ftpFilePath">FTP경로</param>
+        /// <param name="ftpid">FTP ID</param>
+        /// <param name="ftppw">FTP PW</param>
+        /// <param name="svrName">FTP서버명</param>
+        /// <returns></returns>
+        public bool fnMakeFtpDir(string localPath, string serverIp, string ftpBasicPath, string ftpFilePath, string ftpid, string ftppw, string svrName)
+        {
+            try
+            {
+                string strFTPFullPath = string.Format("ftp://{0}{1}{2}", serverIp, ftpBasicPath, ftpFilePath);
+                FtpWebRequest ftpWeb = (FtpWebRequest)WebRequest.Create(strFTPFullPath);
+                ftpWeb.Method = WebRequestMethods.Ftp.MakeDirectory;
+                ftpWeb.Credentials = new NetworkCredential(ftpid, ftppw);
+                ftpWeb.UseBinary = false;
+                //ftpWeb.KeepAlive = true;
+                if (usePassive)
+                {
+                    ftpWeb.UsePassive = true;
+                }
+                //ftpWeb.Timeout = 60000;
+
+                Thread.Sleep(2000);
+
+                using (var resp = (FtpWebResponse)ftpWeb.GetResponse())
+                {
+                    addLog(srvname + " " + ftpFilePath + " 경로 생성완료.");
+                    resp.Close();
+                    return true;
+
+                }
+            }
+            catch (Exception ex)
+            {
+                _errMsg = "[fnMakeFtpDir] FTP폴더생성오류 " + ex.Message;
+                return false;
+            }
+        }
+        #endregion
+
+        #region FTP파일을 다운로드 합니다.
+        /// <summary>
+        /// FTP파일을 다운로드 합니다.
+        /// </summary>
+        /// <param name="serverIp">FTP서버IP</param>
+        /// <param name="ftpBasicPath">FTP기본경로</param>
+        /// <param name="ftpFilePath">FTP경로</param>
+        /// <param name="ftpFilename">FTP다운로드파일명</param>
+        /// <param name="ftpid">FTP ID</param>
+        /// <param name="ftppw">FTP PW</param>
+        /// <param name="backuppath">백업할 경로</param>
+        /// <returns>
+        /// 0 : 성공, -11 : 파일없음
+        /// </returns>
+        public int fnBackupDownload(string serverIp, string ftpBasicPath, string ftpFilePath, string ftpFilename, string ftpid, string ftppw, string backuppath)
+        {
+            try
+            {
+                string strFTPFullPath = string.Format("ftp://{0}{1}{2}/{3}", serverIp, ftpBasicPath, ftpFilePath, ftpFilename);
+                FtpWebRequest ftpWeb = (FtpWebRequest)WebRequest.Create(strFTPFullPath);
+                ftpWeb.Credentials = new NetworkCredential(ftpid, ftppw);
+                if (usePassive)
+                {
+                    ftpWeb.UsePassive = true;
+                }
+                ftpWeb.UseBinary = true;
+                ftpWeb.Timeout = 60000;
+                ftpWeb.Method = WebRequestMethods.Ftp.DownloadFile;
+
+                // RollBack 파일
+                string rolldata = backuppath + ftpFilePath + "\\" + ftpFilename;
+
+                using (FtpWebResponse resp = (FtpWebResponse)ftpWeb.GetResponse())
+                using (Stream respStream = resp.GetResponseStream())
+                using (FileStream fileStream = new FileStream(rolldata, FileMode.Create))
+                {
+                    respStream.CopyTo(fileStream);
+                    addLog("RollBack파일 다운로드완료 : " + ftpFilename);
+                }
+            }
+            catch (Exception ex)
+            {
+                // 파일없는경우
+                return -11;
+            }
+
+            return 0;
+        }
     }
 }
+
+    
