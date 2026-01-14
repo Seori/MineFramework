@@ -67,7 +67,6 @@ namespace MineFramework
             Stream stream = null;
             FileInfo uploadfile = new FileInfo(localPath);
             FileStream fs = uploadfile.OpenRead();
-<<<<<<<<< Temporary merge branch 1
 
             try
             {
@@ -205,6 +204,3 @@ namespace MineFramework
         #endregion
     }
 }
-
-    
->>>>>>>>> Temporary merge branch 2
