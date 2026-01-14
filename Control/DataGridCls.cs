@@ -82,6 +82,7 @@ namespace MineFramework.Control
             }
         }
 
+        [Category("setNoEditGrid"), Description("그리드의 Height조정을 금지합니다.")]
         public void setNoEditGrid()
         {
             dgvList.RowTemplate.Resizable = DataGridViewTriState.False;

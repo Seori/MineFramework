@@ -404,5 +404,26 @@ namespace MineFramework
 
             return _makeDt;
         }
+
+        /// <summary>
+        /// DataTable의 Default를 셋팅합니다.
+        /// </summary>
+        /// <param name="_dt">셋팅할 DataTable</param>
+        /// <param name="dispName">Display명</param>
+        /// <param name="valName">Value명</param>
+        /// <param name="_defaultCodeName">Default값(선택 또는 전체 또는 XX)</param>
+        /// <returns></returns>
+        public static DataTable fnInitDataTable(DataTable _dt, string dispName, string valName, string _defaultCodeName)
+        {
+            DtCls.DataTable_AddColumn(_dt, valName, "");
+            DtCls.DataTable_AddColumn(_dt, dispName, "");
+
+            DataRow dr = _dt.NewRow();
+            dr[valName] = "";
+            dr[dispName] = _defaultCodeName;
+            _dt.Rows.InsertAt(dr, 0);
+
+            return _dt;
+        }
     }
 }
