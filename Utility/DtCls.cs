@@ -106,7 +106,7 @@ namespace MineFramework
         }
 
         /// <summary>
-        /// 2차원배열을 넘겨받아 DataTable형태로 Return합니다.
+        /// 2차원배열을 넘겨받아 DataTable형태로 Return합니다. (Grid에서 사용)
         /// </summary>
         /// <param name="dsource">데이터관련 배열</param>
         /// <returns></returns>
@@ -116,7 +116,7 @@ namespace MineFramework
 
             string[][] headersource =
             {
-                new string[] { "header_name", "resizable_yn", "text_align", "data_name", "width_size", "sort_mode", "col_type" }
+                new string[] { "header_name", "resizable_yn", "text_align", "data_name", "width_size", "sort_mode", "col_type", "display_yn" }
             };
 
             for (int a = 0; a < headersource.Length; a++)

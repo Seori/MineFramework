@@ -30,6 +30,9 @@ namespace MineFramework.Control
             dgvList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
         }
 
+        [Category("Action"), Description("그리드 셀 클릭 이벤트(행/열/값 전달)")]
+        public event EventHandler<DataGridViewCellEventArgs> DataGridViewCellClick;
+
         [Category("ColumnCountSet"), Description("컬럼갯수를 셋팅합니다.")]
         public int setColumn
         {
@@ -162,6 +165,15 @@ namespace MineFramework.Control
                 else
                 {
                     dgvList.Columns[i].ValueType = typeof(string);
+                }
+
+                if (_gridStructure.Rows[i]["display_yn"].ToString() == "Y")
+                {
+                    dgvList.Columns[i].Visible = true;
+                }
+                else
+                {
+                    dgvList.Columns[i].Visible = false;
                 }
 
                 totalwidth += int.Parse(_gridStructure.Rows[i]["width_size"].ToString());
