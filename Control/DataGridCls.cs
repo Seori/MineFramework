@@ -12,6 +12,8 @@ namespace MineFramework.Control
 {
     public partial class DataGridCls : UserControl
     {
+        public event DataGridViewCellEventHandler GridCellClick;
+
         public DataGridCls()
         {
             InitializeComponent();
@@ -28,6 +30,11 @@ namespace MineFramework.Control
 
             // 컬럼 채우기 확인(항상 전체채움)
             dgvList.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+
+            dgvList.CellClick += (s, e) =>
+            {
+                GridCellClick?.Invoke(this, e);
+            };            
         }
 
         [Category("Action"), Description("그리드 셀 클릭 이벤트(행/열/값 전달)")]
