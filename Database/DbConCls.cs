@@ -84,9 +84,14 @@ namespace MineFramework
         /// <summary>
         /// ConnectionString을 생성합니다.
         /// </summary>
-        public static void makeConString()
+        public static void makeConStringSafe()
         {
             constring = "Data Source=" + dbipaddr + "," + dbport + ";Database=" + dbname + ";UID=" + dbid + ";PWD=" + dbpw + ";Connection Timeout=3600;Integrated Security=SSPI"; 
+        }
+
+        public static void makeConString()
+        {
+            constring = "Data Source=" + dbipaddr + "," + dbport + ";Database=" + dbname + ";UID=" + dbid + ";PWD=" + dbpw + ";Connection Timeout=360;";
         }
         
         public static SqlConnection connObject
