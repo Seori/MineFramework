@@ -12,6 +12,7 @@ namespace MineFramework.Control
 {
     public partial class DataGridCls : UserControl
     {
+        
         public event DataGridViewCellEventHandler GridCellClick;
 
         public DataGridCls()
@@ -35,6 +36,11 @@ namespace MineFramework.Control
             {
                 GridCellClick?.Invoke(this, e);
             };            
+        }
+
+        public DataGridView getMyGrid
+        {
+            get { return dgvList; }
         }
 
         [Category("Action"), Description("그리드 셀 클릭 이벤트(행/열/값 전달)")]
